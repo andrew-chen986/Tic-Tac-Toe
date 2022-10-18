@@ -1,3 +1,10 @@
 .box {
-    min-height:50px;
+    min-height:200px;
+}
+
+.col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
 }

@@ -51,6 +51,7 @@ function playGame(gameBoard, displayController) {
     let currPlayer = player1;
     const numSquares = board.length * board[0].length;
     const currPlayerMessage = document.createElement('div');
+    currPlayerMessage.textContent = `Current Player: ${currPlayer.marker}`;
     const body = document.querySelector('body');
     body.appendChild(currPlayerMessage);
     boxes = document.querySelectorAll('.box');
