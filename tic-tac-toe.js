@@ -110,12 +110,17 @@ function playGame(gameBoard, displayController) {
             currPlayer = currPlayer === player1 ? player2 : player1;
             currPlayerMessage.textContent = `Current Player: ${currPlayer.marker}`;
             gameBoard.gameOver = gameBoard.victory();
-            if (gameBoard.gameOver) {
-                console.log(gameBoard.gameOver)    
+            const draw = gameBoard.isFull()
+            if (gameBoard.gameOver || draw) {    
                 // build victory modal to display
                 const victoryModal = document.getElementById('modal');
                 const modalBody = document.querySelector('.modal-body');
-                modalBody.textContent = `${currPlayer.marker} wins!`;
+                if (draw) {
+                    modalBody.textContent = `The game is a draw.`;
+                }
+                else {
+                    modalBody.textContent = `${currPlayer.marker} wins!`;
+                }
                 victoryModal.style.display = "block";
                 const closeButton = document.getElementsByClassName('btn-close')[0];
                 closeButton.onclick = () => {
@@ -129,6 +134,9 @@ function playGame(gameBoard, displayController) {
                 boxes.forEach((box) => {
                     box.replaceWith(box.cloneNode(true));
                 });
+            }
+            if (gameBoard.isFull()) {
+
             }
         });
     });
