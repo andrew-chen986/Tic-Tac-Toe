@@ -27,30 +27,46 @@ const gameBoard = (() => {
     function victory() {
         // check horizontals
         for (let i = 0; i < board.length; i++) {
-            if (board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
-                gameOver = true;
-                return gameOver;
+            if (board[i][0] === '' || board[i][1] === '' || board[i][2] === '') {
+                continue;
+            }
+            else {
+                if (board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
+                    return true;
+                }
             }
         }
         
         // check verticals
         for (let j = 0; j < board[0].length; j++) {
-            if (board[0][j] === board[1][j] === board[2][j]) {
-                gameOver = true;
-                return gameOver;
+            if (board[0][j] === '' || board[1][j] === '' || board[2][j] === '') {
+                continue;
+            }
+            else {
+                if (board[0][j] === board[1][j] && board[1][j] === board[2][j]) {
+                    return true;
+                }
             }
         }
 
         // check diagonals
-        if (board[0][0] === board[1][1] === board[2][2]) {
-            gameOver = true;
-            return gameOver;
+        if (board[0][0] === '' || board[1][1] === '' || board[2][2] === '') {
+            // do nothing
         }
-        if (board[0][2] === board[1][1] === board[2][0]) {
-            gameOver = true;
-            return gameOver;
+        else {
+            if (board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
+                return true;
+            }
         }
-        return gameOver;
+        if (board[0][2] === '' || board[1][1] === '' || board[2][0] === '') {
+            // do nothing
+        }
+        else {
+            if (board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
+                return true;
+            }
+        }
+        return false;
         
     }
     return {board, isFull, markBoard, victory, gameOver}
@@ -93,15 +109,9 @@ function playGame(gameBoard, displayController) {
             displayController.updateDisplay(board);
             currPlayer = currPlayer === player1 ? player2 : player1;
             currPlayerMessage.textContent = `Current Player: ${currPlayer.marker}`;
-            if (gameBoard.victory()) {
-                // remove event listeners 
-                    boxes = document.querySelectorAll('.box');
-                    boxes.forEach((box) => {
-                        box.removeEventListener('click', () => {
-
-                        });
-                    });
-
+            gameBoard.gameOver = gameBoard.victory();
+            if (gameBoard.gameOver) {
+                console.log(gameBoard.gameOver)    
                 // build victory modal to display
                 const victoryModal = document.getElementById('modal');
                 const modalBody = document.querySelector('.modal-body');
@@ -116,11 +126,12 @@ function playGame(gameBoard, displayController) {
                         victoryModal.style.display = "none";
                     }
                 };
+                boxes.forEach((box) => {
+                    box.replaceWith(box.cloneNode(true));
+                });
             }
         });
     });
 }
 
-if (!gameBoard.gameOver) {
-    playGame(gameBoard, displayController);
-}
+playGame(gameBoard, displayController);
