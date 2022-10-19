@@ -72,8 +72,8 @@ const gameBoard = (() => {
     return {board, isFull, markBoard, victory, gameOver}
 })();
 
-const Player = (marker) => {
-    return {marker}
+const Player = (name, marker) => {
+    return {name, marker}
 };
 
 const displayController = (() => {
@@ -92,23 +92,42 @@ const displayController = (() => {
 
 function playGame(gameBoard, displayController) {
     const board = gameBoard.board;
-    const player1 = Player('X');
-    const player2 = Player('O');
+    const p1Name = document.getElementsByClassName('set-player1')[0].textContent;
+    const p2Name = document.getElementsByClassName('set-player2')[0].textContent;
+    const player1 = Player(p1Name, `X`);
+    const player2 = Player(p2Name, `O`);
     let currPlayer = player1;
     const numSquares = board.length * board[0].length;
     const currPlayerMessage = document.createElement('div');
-    currPlayerMessage.textContent = `Current Player: ${currPlayer.marker}`;
+    currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
+    currPlayerMessage.classList.add('fs-4');
+    currPlayerMessage.classList.add('text-center')
     const body = document.querySelector('body');
     body.appendChild(currPlayerMessage);
     let boxes = document.querySelectorAll('.box');
+    let buttons = document.querySelectorAll('.set-player');
+    
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const playerName = prompt("Enter player name: ");
+            button.textContent = playerName;
+            const playerID = parseInt(button.id);
+            if (playerID === 1) {
+                player1.name = playerName;
+            }
+            else {
+                player2.name = playerName;
+            }
+            currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
+        });
+    });
+
     boxes.forEach((box) => {
         const boxID = box.id;
         const boxIndex = parseInt(boxID.slice(boxID.length - 1, boxID.length)) - 1;
         box.addEventListener('click', () => {
-            gameBoard.markBoard(currPlayer, boxIndex);
+            const validMove = gameBoard.markBoard(currPlayer, boxIndex);
             displayController.updateDisplay(board);
-            currPlayer = currPlayer === player1 ? player2 : player1;
-            currPlayerMessage.textContent = `Current Player: ${currPlayer.marker}`;
             gameBoard.gameOver = gameBoard.victory();
             const draw = gameBoard.isFull()
             if (gameBoard.gameOver || draw) {    
@@ -119,7 +138,7 @@ function playGame(gameBoard, displayController) {
                     modalBody.textContent = `The game is a draw.`;
                 }
                 else {
-                    modalBody.textContent = `${currPlayer.marker} wins!`;
+                    modalBody.textContent = `${currPlayer.name} wins!`;
                 }
                 victoryModal.style.display = "block";
                 const closeButton = document.getElementsByClassName('btn-close')[0];
@@ -135,9 +154,10 @@ function playGame(gameBoard, displayController) {
                     box.replaceWith(box.cloneNode(true));
                 });
             }
-            if (gameBoard.isFull()) {
-
+            if (validMove) {
+                currPlayer = currPlayer === player1 ? player2 : player1;
             }
+            currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
         });
     });
 }
