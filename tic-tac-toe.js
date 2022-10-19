@@ -69,7 +69,16 @@ const gameBoard = (() => {
         return false;
         
     }
-    return {board, isFull, markBoard, victory, gameOver}
+
+    function resetBoard() {
+        board = new Array(3);
+        for (let i = 0; i < board.length; i++) {
+            board[i] = new Array(3).fill('');
+        }
+        this.board = board;
+        return this.board;
+    }
+    return {board, isFull, markBoard, victory, gameOver, resetBoard}
 })();
 
 const Player = (name, marker) => {
@@ -91,22 +100,33 @@ const displayController = (() => {
 })();
 
 function playGame(gameBoard, displayController) {
-    const board = gameBoard.board;
+    let board = gameBoard.board;
     const p1Name = document.getElementsByClassName('set-player1')[0].textContent;
     const p2Name = document.getElementsByClassName('set-player2')[0].textContent;
     const player1 = Player(p1Name, `X`);
     const player2 = Player(p2Name, `O`);
     let currPlayer = player1;
-    const numSquares = board.length * board[0].length;
     const currPlayerMessage = document.createElement('div');
     currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
     currPlayerMessage.classList.add('fs-4');
     currPlayerMessage.classList.add('text-center')
     const body = document.querySelector('body');
     body.appendChild(currPlayerMessage);
-    let boxes = document.querySelectorAll('.box');
     let buttons = document.querySelectorAll('.set-player');
     
+    let resetButton = document.getElementById('reset');
+    resetButton.addEventListener('click', () => {
+        let boxes = document.querySelectorAll('.box');
+        board = gameBoard.resetBoard();
+        displayController.updateDisplay(board);
+        currPlayer = player1;
+        currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
+        boxes.forEach((box) => {
+            box.replaceWith(box.cloneNode(true));
+        });
+        initalizeBoxes();
+    });
+
     buttons.forEach((button) => {
         button.addEventListener('click', () => {
             const playerName = prompt("Enter player name: ");
@@ -122,44 +142,49 @@ function playGame(gameBoard, displayController) {
         });
     });
 
-    boxes.forEach((box) => {
-        const boxID = box.id;
-        const boxIndex = parseInt(boxID.slice(boxID.length - 1, boxID.length)) - 1;
-        box.addEventListener('click', () => {
-            const validMove = gameBoard.markBoard(currPlayer, boxIndex);
-            displayController.updateDisplay(board);
-            gameBoard.gameOver = gameBoard.victory();
-            const draw = gameBoard.isFull()
-            if (gameBoard.gameOver || draw) {    
-                // build victory modal to display
-                const victoryModal = document.getElementById('modal');
-                const modalBody = document.querySelector('.modal-body');
-                if (draw) {
-                    modalBody.textContent = `The game is a draw.`;
-                }
-                else {
-                    modalBody.textContent = `${currPlayer.name} wins!`;
-                }
-                victoryModal.style.display = "block";
-                const closeButton = document.getElementsByClassName('btn-close')[0];
-                closeButton.onclick = () => {
-                    victoryModal.style.display = "none";
-                };
-                window.onclick = (event) => {
-                    if (event.target === victoryModal) {
-                        victoryModal.style.display = "none";
+    function initalizeBoxes() {
+        let boxes = document.querySelectorAll('.box');
+        boxes.forEach((box) => {
+            const boxID = box.id;
+            const boxIndex = parseInt(boxID.slice(boxID.length - 1, boxID.length)) - 1;
+            box.addEventListener('click', () => {
+                const validMove = gameBoard.markBoard(currPlayer, boxIndex);
+                displayController.updateDisplay(board);
+                gameBoard.gameOver = gameBoard.victory();
+                const draw = gameBoard.isFull()
+                if (gameBoard.gameOver || draw) {    
+                    // build victory modal to display
+                    const victoryModal = document.getElementById('modal');
+                    const modalBody = document.querySelector('.modal-body');
+                    if (draw) {
+                        modalBody.textContent = `The game is a draw.`;
                     }
-                };
-                boxes.forEach((box) => {
-                    box.replaceWith(box.cloneNode(true));
-                });
-            }
-            if (validMove) {
-                currPlayer = currPlayer === player1 ? player2 : player1;
-            }
-            currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
+                    else {
+                        modalBody.textContent = `${currPlayer.name} wins!`;
+                    }
+                    victoryModal.style.display = "block";
+                    const closeButton = document.getElementsByClassName('btn-close')[0];
+                    closeButton.onclick = () => {
+                        victoryModal.style.display = "none";
+                    };
+                    window.onclick = (event) => {
+                        if (event.target === victoryModal) {
+                            victoryModal.style.display = "none";
+                        }
+                    };
+                    boxes.forEach((box) => {
+                        box.replaceWith(box.cloneNode(true));
+                    });
+                }
+                if (validMove) {
+                    currPlayer = currPlayer === player1 ? player2 : player1;
+                }
+                currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
+            });
         });
-    });
+    }
+    initalizeBoxes();
+
 }
 
 playGame(gameBoard, displayController);
