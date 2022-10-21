@@ -182,7 +182,7 @@ function playGame(gameBoard, displayController) {
         boxes.forEach((box) => {
             const boxID = box.id;
             const boxIndex = parseInt(boxID.slice(boxID.length - 1, boxID.length));
-            box.addEventListener('click', () => {
+            box.addEventListener('click', async () => {
                 const validMove = gameBoard.markBoard(currPlayer, boxIndex);
                 displayController.updateDisplay(board);
                 gameBoard.gameOver = gameBoard.victory();
@@ -213,6 +213,8 @@ function playGame(gameBoard, displayController) {
                 }
                 // make AI move if player 2 is AI
                 if (player2.AI !== 'human' && !gameBoard.gameOver) {
+                    // add small delay to simulate thinking
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     const draw = gameBoard.isFull();
                     if (!draw) {
                         const boxIndex = player2.makeMoveRandom(board);
