@@ -81,8 +81,20 @@ const gameBoard = (() => {
     return {board, isFull, markBoard, victory, gameOver, resetBoard}
 })();
 
-const Player = (name, marker) => {
-    return {name, marker}
+const Player = (name, marker, AI) => {
+    function makeMoveRandom(board) {
+        let vacancies = [];
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                if (board[i][j] === '') {
+                    vacancies.push([i, j]);
+                }
+            }
+        }
+        return vacancies;
+    }
+
+    return {name, marker, AI, makeMoveRandom}
 };
 
 const displayController = (() => {
@@ -103,8 +115,8 @@ function playGame(gameBoard, displayController) {
     let board = gameBoard.board;
     const p1Name = document.getElementsByClassName('set-player1')[0].textContent;
     const p2Name = document.getElementsByClassName('set-player2')[0].textContent;
-    const player1 = Player(p1Name, `X`);
-    const player2 = Player(p2Name, `O`);
+    const player1 = Player(p1Name, `X`, false);
+    let player2 = Player(p2Name, `O`, false);
     let currPlayer = player1;
     const currPlayerMessage = document.createElement('div');
     currPlayerMessage.textContent = `Current Player: (${currPlayer.marker}) ${currPlayer.name}`;
@@ -113,6 +125,18 @@ function playGame(gameBoard, displayController) {
     const body = document.querySelector('body');
     body.appendChild(currPlayerMessage);
     let buttons = document.querySelectorAll('.set-player');
+
+    let easyAI = document.getElementById('easyAI');
+    easyAI.addEventListener('click', () => {
+        if (player2.AI === false) {
+            player2 = Player(p2Name, 'O', true);
+            easyAI.classList.add('active');
+        }
+        else {
+            player2 = Player(p2Name, 'O', false);
+            easyAI.classList.remove('active');
+        }
+    });
     
     let resetButton = document.getElementById('reset');
     resetButton.addEventListener('click', () => {
